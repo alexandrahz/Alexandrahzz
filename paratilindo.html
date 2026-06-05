@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>para ti🌹</title>
+
+<style>
+body {
+    margin: 0;
+    background: linear-gradient(#c084fc, #3b0764);
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #f3e8ff;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+/* 💌 mensaje */
+.mensaje {
+    position: absolute;
+    top: 12%;
+    width: 100%;
+    font-size: 20px;
+    opacity: 0;
+    animation: aparecer 3s ease forwards 4s;
+}
+
+/* 💜 botón */
+#playBtn {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 25px;
+    font-size: 18px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(45deg, #c084fc, #9333ea);
+    color: white;
+    box-shadow: 0 0 20px rgba(192,132,252,0.9);
+    cursor: pointer;
+    animation: latido 1.5s infinite;
+}
+
+/* 📺 VIDEO GRANDE Y CENTRADO */
+#videoContainer {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: 2s;
+}
+
+/* más grande 😏 */
+#videoContainer iframe {
+    width: 420px;
+    height: 240px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(192,132,252,0.9);
+}
+
+/* animaciones */
+@keyframes latido {
+    0%,100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes aparecer {
+    to { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Para mi mor🤍</h1>
+<canvas id="canvas"></canvas>
+
+<button id="playBtn"> Reproducir🤍</button>
+
+<div class="mensaje">
+Flores amarillas para alguien que brilla como el sol ☀️💛<br><br>
+SANARÁS Y VOLVERÁS MÁS FUERTE 🤍<br><br>
+LO MALO ES EL MOMENTO, NO TÚ 💜<br><br>
+PD: NO TIENES QUE DARME LAS GRACIAS 🥰
+</div>
+
+<!-- 📺 VIDEO -->
+<div id="videoContainer">
+<iframe id="ytplayer"
+src="https://www.youtube.com/embed/HeTZW1rpvtA?enablejsapi=1&loop=1&playlist=HeTZW1rpvtA"
+frameborder="0"
+allow="autoplay">
+</iframe>
+</div>
+
+<script>
+// 🎶 botón
+const btn = document.getElementById("playBtn");
+
+btn.addEventListener("click", () => {
+    const player = document.getElementById("ytplayer");
+    player.src += "&autoplay=1&mute=0";
+
+    btn.style.display = "none";
+});
+
+// 🎨 canvas
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let flowers = [];
+let falling = [];
+let explosion = [];
+let t = 0;
+let completed = false;
+
+// 💛 corazón
+function heartShape(t) {
+    let x = 16 * Math.pow(Math.sin(t), 3);
+    let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+    return {
+        x: canvas.width/2 + x * 18,
+        y: canvas.height/2 + y * 18 - 50
+    };
+}
+
+// 🌼 crear flores
+function createFlower() {
+    let pos = heartShape(t);
+    flowers.push(pos);
+    t += 0.04;
+
+    if (t >= Math.PI * 2 && !completed) {
+        completed = true;
+        explodeHeart();
+        document.getElementById("videoContainer").style.opacity = 1;
+    }
+}
+
+// 💥 explosión
+function explodeHeart() {
+    for (let f of flowers) {
+        for (let i = 0; i < 3; i++) {
+            explosion.push({
+                x: f.x,
+                y: f.y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                size: 3 + Math.random() * 3
+            });
+        }
+    }
+}
+
+// 🌸 flores cayendo
+function createFallingFlower() {
+    falling.push({
+        x: Math.random() * canvas.width,
+        y: -10,
+        speed: 1 + Math.random() * 2,
+        size: 3 + Math.random() * 3
+    });
+}
+
+// 🌼 dibujar flor
+function drawFlower(x, y, size) {
+    for (let i = 0; i < 5; i++) {
+        let angle = i * (Math.PI * 2 / 5);
+        let px = x + Math.cos(angle) * size;
+        let py = y + Math.sin(angle) * size;
+
+        ctx.beginPath();
+        ctx.arc(px, py, size/2, 0, Math.PI * 2);
+        ctx.fillStyle = "yellow";
+        ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(x, y, size/2, 0, Math.PI * 2);
+    ctx.fillStyle = "orange";
+    ctx.fill();
+}
+
+// 🎬 animación
+function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if (!completed) createFlower();
+
+    for (let f of flowers) {
+        drawFlower(f.x, f.y, 4);
+    }
+
+    for (let e of explosion) {
+        e.x += e.vx;
+        e.y += e.vy;
+        e.vy += 0.05;
+        drawFlower(e.x, e.y, e.size);
+    }
+
+    if (Math.random() < 0.3) createFallingFlower();
+
+    for (let i = 0; i < falling.length; i++) {
+        let f = falling[i];
+        f.y += f.speed;
+        drawFlower(f.x, f.y, f.size);
+
+        if (f.y > canvas.height) {
+            falling.splice(i, 1);
+            i--;
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
